@@ -2,6 +2,9 @@ from pathlib import Path
 from decouple import config
 import os
 
+# Nasa api key
+FIRMS_API_KEY = config('FIRMS_API_KEY', default='')
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
