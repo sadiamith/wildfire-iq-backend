@@ -285,8 +285,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-- Project Link: [https://github.com/yourusername/wildfire-iq-backend](https://github.com/yourusername/wildfire-iq-backend)
-- Frontend Repository: [https://github.com/yourusername/wildfire-iq-frontend](https://github.com/yourusername/wildfire-iq-frontend)
+- Project Link: [https://github.com/yourusername/wildfire-iq-backend](https://github.com/sadiamith/wildfire-iq-backend)
+- Frontend Repository: [https://github.com/yourusername/wildfire-iq-frontend](https://github.com/sadiamith/wildfire-iq-frontend)
 
 ---
 
