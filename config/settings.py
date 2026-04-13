@@ -46,9 +46,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  
-    "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -80,11 +80,23 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# Use DATABASE_URL if available (for production), otherwise use SQLite
-if config("DATABASE_URL", default=""):
+# Use DATABASE_URL if available, otherwise build from Railway PG* vars, otherwise SQLite
+DATABASE_URL = config("DATABASE_URL", default="")
+
+# Railway provides individual PG* vars instead of DATABASE_URL
+if not DATABASE_URL:
+    _pg_user = config("PGUSER", default="")
+    _pg_password = config("PGPASSWORD", default="")
+    _pg_host = config("PGHOST", default="")
+    _pg_port = config("PGPORT", default="5432")
+    _pg_database = config("PGDATABASE", default="")
+    if all([_pg_user, _pg_password, _pg_host, _pg_database]):
+        DATABASE_URL = f"postgresql://{_pg_user}:{_pg_password}@{_pg_host}:{_pg_port}/{_pg_database}"
+
+if DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.parse(
-            config("DATABASE_URL"), conn_max_age=600, ssl_require=True
+            DATABASE_URL, conn_max_age=600, ssl_require=True
         )
     }
 else:
@@ -148,15 +160,23 @@ CORS_ALLOWED_ORIGINS = config(
     cast=lambda v: [s.strip() for s in v.split(",")],
 )
 
-# If we want to allow all origins during development (NOTE TO SELF: be careful in production!)
+# Always include production frontend origins
+_PRODUCTION_ORIGINS = [
+    "https://wildfire-iq-frontend.vercel.app",
+    "https://wildfire-iq-frontend-qifc4hcdu-sadi-mustafas-projects.vercel.app",
+]
+for origin in _PRODUCTION_ORIGINS:
+    if origin not in CORS_ALLOWED_ORIGINS:
+        CORS_ALLOWED_ORIGINS.append(origin)
+
+# Allow Vercel preview deployments via regex
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://wildfire-iq-.*\.vercel\.app$",
+]
+
+# Allow all origins during development
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
-else:
-    # In production, add our vercel domain
-    CORS_ALLOWED_ORIGINS += [
-        "https://wildfire-iq-frontend.vercel.app",  
-        "https://wildfire-iq-frontend-qifc4hcdu-sadi-mustafas-projects.vercel.app",  # For preview deployments
-    ]
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
